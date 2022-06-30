@@ -1,0 +1,79 @@
+from sys import stdin
+
+input_data = []
+
+for line in stdin:
+    input_data.append(line)
+
+# while True:
+#     line = input()
+#     if line:
+#         input_data.append(line)
+#     else:
+#         break
+
+field_size = list(map(lambda el: int(el), input_data[0].split(" ")[0:2]))
+
+field = list(map(lambda el: list(filter(lambda symb: symb != '', el.split(' '))), input_data[1:]))
+
+position_history = []
+
+position = [0, 0]
+
+
+for i in range(0, field_size[0]):
+    for j in range(0, field_size[1]):
+        if field[i][j] == 'S':
+            position[0] = i
+            position[1] = j
+        else:
+            field[i][j] = int(field[i][j])
+position_history.append((position[0], position[1]))
+
+field[position[0]][position[1]] = 0
+
+for i in range(0, field_size[0]):
+    if i < position[0]:
+        continue
+    for j in range(0, field_size[1]):
+        if j < position[1]:
+            continue
+        top = i - 1
+        left = j - 1
+        if top >= position[0] and left >= position[1]:
+            field[i][j] = max(field[top][j], field[i][left]) + field[i][j]
+        elif top >= position[0]:
+            field[i][j] = field[top][j] + field[i][j]
+        elif left >= position[1]:
+            field[i][j] = field[i][left] + field[i][j]
+
+position[0] = field_size[0] - 1
+position[1] = field_size[1] - 1
+
+position_history.append((position[0], position[1]))
+
+while not (position[0] == position_history[0][0] and position[1] == position_history[0][1]):
+
+    bottom = position[0] - 1
+    right = position[1] - 1
+    if bottom >= position_history[0][0] and right >= position_history[0][1]:
+        if field[position[0]][right] > field[bottom][position[1]]:
+            position[1] = right
+        else:
+            position[0] = bottom
+    elif right >= position_history[0][1]:
+        position[1] = right
+    elif bottom >= position_history[0][0]:
+        position[0] = bottom
+    else:
+        break
+    position_history.append((position[0], position[1]))
+
+position_history = sorted(set(position_history))
+
+path_to_print = ''
+for position in position_history:
+    path_to_print += "(" + str(position[0]) + "," + str(position[1]) + ") "
+print("Path:")
+print(path_to_print.strip())
+print("Coins: " + str(field[field_size[0] - 1][field_size[1] - 1]))
